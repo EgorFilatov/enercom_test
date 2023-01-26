@@ -12,12 +12,20 @@ class SerialData(QThread):
 
     def __init__(self):
         QThread.__init__(self)
+        #self.serial_port.readyRead.connect(print("a"))
+
 
     def open_port(self, port_name):
         self.serial_port.setBaudRate(115200)
         self.serial_port.setPortName(port_name)
-        self.serial_port.open(QIODevice.OpenModeFlag.ReadWrite)
-        self.serial_port.readyRead.connect(self.serial_read())
+        #self.serial_port.open(QIODevice.OpenModeFlag.ReadWrite)
+        r = self.serial_port.open(QIODevice.OpenModeFlag.ReadWrite)
+        if not r:
+            print('Port open error')
+        else:
+            print('Port opened')
+            self.serial_port.readyRead.connect(self.com_read_data())
+        #self.serial_port.readyRead.connect(self.read_from_port())
 
     def close_port(self):
         self.serial_port.close()
@@ -28,9 +36,10 @@ class SerialData(QThread):
             available_serial_ports.append(port.portName())
         return available_serial_ports
 
-    def serial_read(self):
-        rx = self.serial_port.readAll()
-        print(rx)
+    def read_from_port(self):
+        print("a")
+        #rx = self.serial_port.readAll()
+        #print(rx)
 
 
 
@@ -82,4 +91,4 @@ class App(QWidget):
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
-    app.exec()
+    sys.exit(app.exec())
