@@ -1,12 +1,9 @@
-import sys
-import PyQt6
-from PyQt6.QtWidgets import QApplication, QWidget
-from PyQt6 import QtCore
-from PyQt6.QtCore import QThread, QIODevice
-from PyQt6.QtSerialPort import QSerialPort, QSerialPortInfo
+from PyQt6 import QtCore, QtWidgets
 from PyQt6 import uic
+import thread
 
 
+<<<<<<< HEAD
 class SerialData(QThread):
     serial_port = QSerialPort()
 
@@ -50,45 +47,58 @@ class App(QWidget):
 
     def __init__(self):
         QWidget.__init__(self)
+=======
+class MainWindow(QtWidgets.QWidget):
+    def __init__(self, parent=None):
+        QtWidgets.QWidget.__init__(self, parent)
+>>>>>>> 3019151596a31ffa7c31669a3297d15ec40ce764
         self.ui = uic.loadUi("enercom.ui")
         self.ui.show()
-        self.button_actions()
+        self.ui.btn_connect.clicked.connect(self.show_connect)
+        self.ui.btn_disconnect.setDisabled(True)
+        self.ui.btn_disconnect.clicked.connect(self.show_disconnect)
+        self.com_thread = thread.ComThread()
         self.cmb_data()
 
-    def button_actions(self):
-        self.ui.btn_connect.clicked.connect(lambda: self.click(button_name="btn_connect"))
-        self.ui.btn_disconnect.clicked.connect(lambda: self.click(button_name="btn_disconnect"))
+        self.com_thread.serial_data.connect(self.on_change, QtCore.Qt.ConnectionType.QueuedConnection)
 
     def cmb_data(self):
-        self.ui.cmb_availiable_serial_ports.addItems(self.serial.find_available_serial_ports())
+        self.ui.cmb_availiable_serial_ports.addItems(self.com_thread.find_available_serial_ports())
 
-    def click(self, button_name=""):
-        labels = [self.ui.p1_0_0, self.ui.p1_0_1, self.ui.p1_0_2, self.ui.p1_0_3,
-                  self.ui.p1_0_4, self.ui.p1_0_5, self.ui.p1_0_6, self.ui.p1_0_7,
-                  self.ui.p1_1_0, self.ui.p1_1_1, self.ui.p1_1_2, self.ui.p1_1_3,
-                  self.ui.p1_1_4, self.ui.p1_1_5, self.ui.p1_1_6, self.ui.p1_1_7,
-                  self.ui.p1_2_0, self.ui.p1_2_1, self.ui.p1_2_2, self.ui.p1_2_3,
-                  self.ui.p1_2_4, self.ui.p1_2_5, self.ui.p1_2_6, self.ui.p1_2_7,
-                  self.ui.p1_3_0, self.ui.p1_3_1, self.ui.p1_3_2, self.ui.p1_3_3,
-                  self.ui.p1_3_4, self.ui.p1_3_5, self.ui.p1_3_6, self.ui.p1_3_7,
+    def show_connect(self):
+        self.com_thread.open_port(self.ui.cmb_availiable_serial_ports.currentText())
+        self.turn_on_label()
 
-                  self.ui.p2_0_0, self.ui.p2_0_1, self.ui.p2_0_2, self.ui.p2_0_3,
-                  self.ui.p2_0_4, self.ui.p2_0_5, self.ui.p2_0_6, self.ui.p2_0_7,
-                  self.ui.p2_1_0, self.ui.p2_1_1, self.ui.p2_1_2, self.ui.p2_1_3,
-                  self.ui.p2_1_4, self.ui.p2_1_5, self.ui.p2_1_6, self.ui.p2_1_7,
-                  self.ui.p2_2_0, self.ui.p2_2_1, self.ui.p2_2_2, self.ui.p2_2_3,
-                  self.ui.p2_2_4, self.ui.p2_2_5, self.ui.p2_2_6, self.ui.p2_2_7,
-                  self.ui.p2_3_0, self.ui.p2_3_1, self.ui.p2_3_2, self.ui.p2_3_3,
-                  self.ui.p2_3_4, self.ui.p2_3_5, self.ui.p2_3_6, self.ui.p2_3_7,
-                  ]
-        if button_name == "btn_connect":
-            self.serial.open_port(self.ui.cmb_availiable_serial_ports.currentText())
+        self.ui.lbl_connection_status.setText("Подключено")
+        self.ui.btn_connect.setDisabled(True)
+        self.ui.btn_disconnect.setDisabled(False)
+        self.ui.p1_0_0.setStyleSheet("background-color : green")
 
-        if button_name == "btn_disconnect":
-            self.serial.close_port()
+    def show_disconnect(self):
+        self.com_thread.close_port()
+
+        self.ui.lbl_connection_status.setText("")
+        self.ui.btn_disconnect.setDisabled(True)
+        self.ui.btn_connect.setDisabled(False)
+        self.ui.p1_0_0.setStyleSheet("background-color : red")
+
+    def turn_on_label(self):
+        a = 0
+        #print(self.com_thread.received_data_full_int)
+        #if self.com_thread.received_data_full_int[0] & (1 << 0):
+        #    self.ui.p1_0_1.setStyleSheet("background-color : green")
+
+    def on_change(self, s):
+        print(s)
 
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     app = QApplication(sys.argv)
     ex = App()
+=======
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+>>>>>>> 3019151596a31ffa7c31669a3297d15ec40ce764
     sys.exit(app.exec())
