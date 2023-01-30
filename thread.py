@@ -1,9 +1,10 @@
-from PyQt6 import QtCore, QtSerialPort
+from PyQt6 import QtCore, QtSerialPort, uic
 import re
+import main
 
 
 class ComThread(QtCore.QThread):
-    serial_data = QtCore.pyqtSignal(str)
+    serial_data = QtCore.pyqtSignal(list)
 
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
@@ -11,6 +12,7 @@ class ComThread(QtCore.QThread):
         self.serial_port.setBaudRate(115200)
         self.serial_port.readyRead.connect(self.read_data)
         self.received_data_previous = ""
+        self.received_data_full_int = []
 
     def find_available_serial_ports(self):
         self.available_serial_ports = []
@@ -44,10 +46,17 @@ class ComThread(QtCore.QThread):
         data_int = []
         for el in data:
             data_int.append(int(el, 16))
-        print(data_int)
+        self.received_data_full_int = data_int
+        self.turn_on()
 
 
-
+    def turn_on(self):
+        if len(self.received_data_full_int) > 0:
+            #print(self.received_data_full_int)
+            self.serial_data.emit(self.received_data_full_int)
+        #if len(self.com_thread.received_data_full_int) > 0 and self.com_thread.received_data_full_int[0] & (1 << 0):
+            #a=0
+        #    self.ui.p1_0_1.setStyleSheet("background-color : green")
 
 
     def run(self):
