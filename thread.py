@@ -29,6 +29,7 @@ class ComThread(QtCore.QThread):
 
     def read_data(self):
         self.received_data = str(self.serial_port.readAll().toHex()).replace('b', '').replace("'", '')
+        print(self.received_data)
         self.ready_to_convert_flag = 0
         self.received_data_full = ""
         if len(self.received_data) > 0 and self.received_data[0] == '5' and self.received_data[1] == '5':
@@ -52,12 +53,7 @@ class ComThread(QtCore.QThread):
 
     def turn_on(self):
         if len(self.received_data_full_int) > 0:
-            #print(self.received_data_full_int)
             self.serial_data.emit(self.received_data_full_int)
-        #if len(self.com_thread.received_data_full_int) > 0 and self.com_thread.received_data_full_int[0] & (1 << 0):
-            #a=0
-        #    self.ui.p1_0_1.setStyleSheet("background-color : green")
-
 
     def run(self):
         True
