@@ -1,6 +1,5 @@
-from PyQt6 import QtCore, QtSerialPort, uic
+from PyQt6 import QtCore, QtSerialPort
 import re
-import main
 
 
 class ComThread(QtCore.QThread):
@@ -8,17 +7,21 @@ class ComThread(QtCore.QThread):
 
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
+
+        self.enercom_message_str = ""
+        self.received_data = ""
+        self.running = 0
+
         self.serial_port = QtSerialPort.QSerialPort()
         self.serial_port.setBaudRate(115200)
-        self.serial_port.readyRead.connect(self.read_data)
-        self.received_data_previous = ""
-        self.received_data_full_int = []
 
-    def find_available_serial_ports(self):
-        self.available_serial_ports = []
+        self.serial_port.readyRead.connect(self.read_data)
+
+    def find_serial_ports(self):
+        serial_ports = []
         for port in QtSerialPort.QSerialPortInfo.availablePorts():
-            self.available_serial_ports.append(port.portName())
-        return self.available_serial_ports
+            serial_ports.append(port.portName())
+        return serial_ports
 
     def open_port(self, port_name):
         self.serial_port.setPortName(port_name)
@@ -29,32 +32,28 @@ class ComThread(QtCore.QThread):
 
     def read_data(self):
         self.received_data = str(self.serial_port.readAll().toHex()).replace('b', '').replace("'", '')
-        print(self.received_data)
-        self.ready_to_convert_flag = 0
-        self.received_data_full = ""
-        if len(self.received_data) > 0 and self.received_data[0] == '5' and self.received_data[1] == '5':
-            self.ready_to_convert_flag = 1
-            self.received_data_full = self.received_data_previous
-            self.received_data_previous = self.received_data
-        else:
-            self.received_data_previous = self.received_data_previous + self.received_data
+        self.running = 1
+        print("1")
+        if not self.isRunning():
+            self.start()
 
-        if self.ready_to_convert_flag == 1:
-            self.convert_data_to_int(self.received_data_full)
-
-    def convert_data_to_int(self, data):
-        data = re.findall('.{%s}' % 2, data)
-        data_int = []
-        for el in data:
-            data_int.append(int(el, 16))
-        self.received_data_full_int = data_int
-        self.turn_on()
-
-
-    def turn_on(self):
-        if len(self.received_data_full_int) > 0:
-            self.serial_data.emit(self.received_data_full_int)
+        #received_data = str(self.serial_port.readAll().toHex()).replace('b', '').replace("'", '')
+        #if received_data[0] == '5' and received_data[1] == '5':
+        #    self.enercom_message_str = received_data
+        #else:
+        #    self.enercom_message_str = self.enercom_message_str + received_data
+        #if len(self.enercom_message_str) == 110:
+        #    self.enercom_message_str = re.findall('.{%s}' % 2, self.enercom_message_str)
+        #    enercom_message_int = []
+        #    for el in self.enercom_message_str:
+        #        enercom_message_int.append(int(el, 16))
+        #    if len(enercom_message_int) > 0:
+        #        print(enercom_message_int)
+        #        self.serial_data.emit(enercom_message_int)
 
     def run(self):
         True
+
+
+
 
