@@ -53,7 +53,10 @@ class ComThread(QtCore.QThread):
     def run(self):
         while True:
             if self.serial_port.waitForReadyRead():
-                received_data = str(self.serial_port.readAll().toHex()).replace('b', '').replace("'", '')
+                #received_data = str(self.serial_port.readAll().toHex()).replace('b', '').replace("'", '')
+                received_data = self.serial_port.readAll()
+                r = received_data.toInt()
+                print(r)
                 if received_data[0] == '5' and received_data[1] == '5':
                     self.enercom_message_str = received_data
                 else:
@@ -64,8 +67,9 @@ class ComThread(QtCore.QThread):
                     for el in self.enercom_message_str:
                         enercom_message_int.append(int(el, 16))
                     if len(enercom_message_int) > 0:
-                        print(enercom_message_int)
-                        self.serial_data.emit(enercom_message_int)
+                        True
+                        #print(enercom_message_int)
+                        #self.serial_data.emit(enercom_message_int)
 
 
 
