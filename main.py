@@ -125,13 +125,26 @@ class MainWindow(QtWidgets.QWidget):
         self.com_thread.serial_data.connect(self.on_change, QtCore.Qt.ConnectionType.QueuedConnection)
         self.cmb_data()
 
+        self.com_thread.started.connect(self.on_started)
+        self.com_thread.finished.connect(self.on_finished)
+
+    def on_started(self):  # Вызывается при запуске потока
+        print("Вызван метод on_started ()")
+
+    def on_finished(self):  # Вызывается при завершении потока
+        print("Вызван метод on_finished()")
+
+
     def connect_serial(self):
         if self.connection_flag == 0:
             self.connection_flag = 1
             self.com_thread.open_port(self.ui.cmb_serial_ports.currentText())
+            self.com_thread.start()
+
             self.ui.btn_connect.setText("Отключиться")
             self.ui.btn_scan.setDisabled(True)
         else:
+            self.com_thread.terminate()
             self.connection_flag = 0
             self.com_thread.close_port()
             self.ui.btn_connect.setText("Подключиться")
@@ -147,12 +160,13 @@ class MainWindow(QtWidgets.QWidget):
         a = 0
         while a < 48:
             i = 0
-            while i < 8:
-                if s[a + 5] & (1 << i):
-                    self.labels[i + (8 * a)].setStyleSheet("background-color : green")
-                if not s[a + 5] & (1 << i):
-                    self.labels[i + (8 * a)].setStyleSheet("background-color : #f95a5a")
-                i = i + 1
+            if (a + 5) != 0:
+                while i < 8:
+                    if s[a + 5] & (1 << i):
+                        self.labels[i + (8 * a)].setStyleSheet("background-color : green")
+                    if not s[a + 5] & (1 << i):
+                        self.labels[i + (8 * a)].setStyleSheet("background-color : #f95a5a")
+                    i = i + 1
             a = a + 1
 
 if __name__ == '__main__':
