@@ -7,7 +7,6 @@ class ComThread(QtCore.QThread):
 
     def __init__(self, parent=None):
         QtCore.QThread.__init__(self, parent)
-
         self.enercom_message_str = ""
 
         self.serial_port = QtSerialPort.QSerialPort()
@@ -54,22 +53,24 @@ class ComThread(QtCore.QThread):
         while True:
             if self.serial_port.waitForReadyRead():
                 #received_data = str(self.serial_port.readAll().toHex()).replace('b', '').replace("'", '')
-                received_data = self.serial_port.readAll()
-                r = received_data.toInt()
-                print(r)
-                if received_data[0] == '5' and received_data[1] == '5':
-                    self.enercom_message_str = received_data
-                else:
-                    self.enercom_message_str = self.enercom_message_str + received_data
-                if len(self.enercom_message_str) == 110:
-                    self.enercom_message_str = re.findall('.{%s}' % 2, self.enercom_message_str)
-                    enercom_message_int = []
-                    for el in self.enercom_message_str:
-                        enercom_message_int.append(int(el, 16))
-                    if len(enercom_message_int) > 0:
-                        True
-                        #print(enercom_message_int)
-                        #self.serial_data.emit(enercom_message_int)
+
+                received_data = self.serial_port.readAll().toHex()
+                #if len
+                print(received_data[2:-1])
+
+                #if received_data[0] == '5' and received_data[1] == '5':
+                #    self.enercom_message_str = received_data
+                #else:
+                #    self.enercom_message_str = self.enercom_message_str + received_data
+                #if len(self.enercom_message_str) == 110:
+                #    self.enercom_message_str = re.findall('.{%s}' % 2, self.enercom_message_str)
+                #    enercom_message_int = []
+                #    for el in self.enercom_message_str:
+                #        enercom_message_int.append(int(el, 16))
+                #    if len(enercom_message_int) > 0:
+                #        True
+                #        print(enercom_message_int)
+                #        self.serial_data.emit(enercom_message_int)
 
 
 
